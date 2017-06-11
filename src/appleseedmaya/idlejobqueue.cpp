@@ -29,6 +29,9 @@
 // Interface header.
 #include "appleseedmaya/idlejobqueue.h"
 
+// Standard headers.
+#include <cassert>
+
 // tbb headers.
 #include "tbb/concurrent_queue.h"
 
@@ -43,12 +46,12 @@
 namespace
 {
 
-tbb::concurrent_queue<boost::function<void()> > g_jobQueue;
+tbb::concurrent_queue<std::function<void()> > g_jobQueue;
 MCallbackId g_callbackId;
 
 static void idleCallback(void *clientData)
 {
-    boost::function<void()> job;
+    std::function<void()> job;
     if (g_jobQueue.try_pop(job))
         job();
 }
@@ -97,7 +100,7 @@ void stop()
         g_callbackId = 0;
 
         // Perform any pending jobs.
-        boost::function<void()> job;
+        std::function<void()> job;
         while (g_jobQueue.try_pop(job))
             job();
 
@@ -105,7 +108,7 @@ void stop()
     }
 }
 
-void pushJob(boost::function<void ()> job)
+void pushJob(std::function<void ()> job)
 {
     assert(job);
     assert(g_callbackId != 0);
